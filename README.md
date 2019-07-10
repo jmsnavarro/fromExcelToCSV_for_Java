@@ -1,4 +1,4 @@
-# fromExcelToCSV
+# fromExcelToCSV in Java
 
 A terminal app written in Java that reads Excel rows and export to a pipe-delimited csv file.
 
