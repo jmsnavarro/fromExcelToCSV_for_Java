@@ -32,7 +32,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 
 //TODO: Write execution steps to a log file
-//TODO: Push to Github
 //TODO: Add logging sample in README.md
 
 public class App
@@ -113,6 +112,7 @@ public class App
         try {
             //Get Excel file
             FileInputStream file = new FileInputStream(new File(INPUT_FILENAME));
+            logger.info("Opening file '" + INPUT_FILENAME + "'");
 
             //Create Workbook instance holding reference to .xlsx file
             XSSFWorkbook workbook = new XSSFWorkbook(file);
@@ -126,6 +126,8 @@ public class App
 
             //Build CSV
             try {
+                logger.info("Preparing to read your file");
+
                 //Get year else app exit
                 CellReference cellReference = new CellReference(YEAR_COLUMN);
                 Row headerRow = sheet.getRow(cellReference.getRow());
@@ -167,6 +169,7 @@ public class App
                 Iterator<Row> rowIterator = sheet.iterator();
                 while (rowIterator.hasNext()) {
                     Row row = rowIterator.next();
+                    logger.info("Reading row " + (row.getRowNum() - 1));
 
                     //For each row, iterate through all the columns
                     Iterator<Cell> cellIterator = row.cellIterator();
@@ -207,7 +210,7 @@ public class App
             logger.warn(e.getMessage());
             System.exit(0);
         }
-        logger.info("Successfully created a CSV file.");
+        logger.info("Successfully created a CSV file");
         System.exit(0);
     }
 }
