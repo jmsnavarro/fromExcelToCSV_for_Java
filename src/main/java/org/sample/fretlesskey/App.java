@@ -32,6 +32,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 
 //TODO: Write execution steps to a log file
+//TODO: Add Excel file version detection (2003 vs 2007) using Apache Tika
 
 public class App
 {
