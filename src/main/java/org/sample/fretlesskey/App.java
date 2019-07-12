@@ -32,7 +32,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 
 //TODO: Write execution steps to a log file
-//TODO: Add logging sample in README.md
 
 public class App
 {
