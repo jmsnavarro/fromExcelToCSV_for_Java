@@ -26,7 +26,7 @@ $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
 ```
 ```
 ## with output log (in Powershell terminal)
-java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
+$ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
 ```
 
 ## Output
@@ -42,4 +42,15 @@ Format: YYYYMMSRC_FILENAME.csv
 Format: YYYYMMDD_HHMMHH_fromExcelToCSV.java.log
 ```
 20190712_1402_fromExcelToCSV.java.log
+```
+
+## Developer Notes:
+
+```
+## generate single jar file
+$ mvn clean compile assembly:single
+```
+```
+## cleaning up
+$ mvn clean
 ```
