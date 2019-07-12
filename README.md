@@ -21,11 +21,25 @@ Developed using Visual Studio Code and Apache Maven with the following extension
 
 ## How to run
 ```
+## simple
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
 ```
+```
+## with output log (in Powershell terminal)
+java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
+```
 
-## Output: csv and log files
-- YYYYMMSRC_FILENAME.csv
-(e.g. 201804FOOD_MENU.csv)
-- YYYYMMDD_HHMMHH_fromExcelToCSV.py.log
-(e.g. 20180402_080012_fromExcelToCSV.py.log)
+## Output
+
+**CSV**
+
+Format: YYYYMMSRC_FILENAME.csv
+```
+201804FOOD_MENU.csv
+```
+**Log**
+
+Format: YYYYMMDD_HHMMHH_fromExcelToCSV.java.log
+```
+20190712_1402_fromExcelToCSV.java.log
+```
