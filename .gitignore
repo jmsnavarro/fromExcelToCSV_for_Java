@@ -1,4 +1,5 @@
 target/
+.metals/
 *.csv
 *.xls
 *.log
