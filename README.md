@@ -31,6 +31,10 @@ $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
 ## with output log (in Powershell terminal)
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
 ```
+```
+## with output log (in Linux terminal)
+$ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(date +%Y%M%d_%H%M)_fromExcelToCSV.java.log"
+```
 
 ## Output
 
