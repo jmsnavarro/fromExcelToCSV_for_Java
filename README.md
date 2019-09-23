@@ -20,6 +20,9 @@ Developed using Visual Studio Code and Apache Maven with the following extension
 7. Data rows are read from `A` to `E` cells where `A` cell values must be numeric
 
 ## How to run
+
+> Note: See **Developer Notes** below to create the jar file
+
 ```
 ## simple
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
