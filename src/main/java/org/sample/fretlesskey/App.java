@@ -6,11 +6,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.text.CaseUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -31,12 +34,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  */
 
-//TODO: Write execution steps to a log file
+//TODO: Write execution steps to a log file instead of piping at run time
 //TODO: Add Excel file version detection (2003 vs 2007) using Apache Tika
 
 public class App
 {
     //constants
+    static final String APPNAME = App.class.getName();
     static final String PLATTER = "PLATTER";
     static final String DRINKS = "DRINKS";
     static final String INPUT_FILENAME = "food_menu.xlsx";
@@ -106,33 +110,38 @@ public class App
         String strCellValue = null;
         Integer intYear = 0;
         String strSheetName = null;
+        String strOutputFileName = null;
         String monthNumber = null;
         String strMenuGroup = null;
+        Integer intRecordCount = 0;
+
+        //Set run time
+        LocalDateTime startDateTime = LocalDateTime.now();
 
         try {
+            //Show execution start
+            logger.info("Starting execution of " + APPNAME);
+
             //Get Excel file
             FileInputStream file = new FileInputStream(new File(INPUT_FILENAME));
-            logger.info("Opening file '" + INPUT_FILENAME + "'");
-
+            
             //Create Workbook instance holding reference to .xlsx file
             XSSFWorkbook workbook = new XSSFWorkbook(file);
-
+            
             //Get first/desired sheet from the workbook
             XSSFSheet sheet = workbook.getSheetAt(0);
-
+            
             //Get sheet name
             strSheetName = sheet.getSheetName().toString();
             monthNumber = getNumMonthVal(strSheetName);
-
+            
             //Build CSV
             try {
-                logger.info("Preparing to read your file");
-
                 //Get year else app exit
                 CellReference cellReference = new CellReference(YEAR_COLUMN);
                 Row headerRow = sheet.getRow(cellReference.getRow());
                 Cell headerCell = headerRow.getCell(cellReference.getCol());
-
+                
                 if (headerCell.getCellType() == CellType.NUMERIC) {
                     try {
                         intYear = (int)headerCell.getNumericCellValue();
@@ -151,6 +160,11 @@ public class App
                     file.close();
                     System.exit(0);
                 }
+                
+                //Show log header
+                logger.info("Opening file '" + INPUT_FILENAME + "' for " 
+                    + CaseUtils.toCamelCase(strSheetName, true) + " " 
+                    + intYear + "...");
 
                 //Generate output filename
                 StringBuilder sbOutputFilename = new StringBuilder();
@@ -158,9 +172,10 @@ public class App
                 sbOutputFilename.append(monthNumber);
                 sbOutputFilename.append(OUTPUT_FILE);
                 sbOutputFilename.append(".csv");
+                strOutputFileName = sbOutputFilename.toString();
 
                 FileWriter csvFileWriter =
-                    new FileWriter(sbOutputFilename.toString());
+                    new FileWriter(strOutputFileName);
                 CSVFormat csvFileFormat = CSVFormat.DEFAULT.withDelimiter('|');
                 CSVPrinter csvFilePrinter = new CSVPrinter(csvFileWriter, csvFileFormat);
                 ArrayList<Object> detail = new ArrayList<Object>();
@@ -169,7 +184,6 @@ public class App
                 Iterator<Row> rowIterator = sheet.iterator();
                 while (rowIterator.hasNext()) {
                     Row row = rowIterator.next();
-                    logger.info("Reading row " + (row.getRowNum() - 1));
 
                     //For each row, iterate through all the columns
                     Iterator<Cell> cellIterator = row.cellIterator();
@@ -196,6 +210,10 @@ public class App
                         detail.add(1, intYear);
                         detail.add(2, strMenuGroup);
                         csvFilePrinter.printRecord(detail);
+                        
+                        intRecordCount++;
+                        logger.info("Collecting data from '" + strMenuGroup 
+                            + "' at row " + (row.getRowNum()));
                     }
                     detail.clear();
                 }
@@ -210,7 +228,24 @@ public class App
             logger.warn(e.getMessage());
             System.exit(0);
         }
-        logger.info("Successfully created a CSV file");
+
+        //Summary
+        String formattedRunTime = null;
+        try {            
+            LocalDateTime endDateTime = LocalDateTime.now();
+            Duration spanDateTime = Duration.between(startDateTime, endDateTime);
+            formattedRunTime = String.format("%d:%02d:%02d", 
+                spanDateTime.toHours(),
+                spanDateTime.toMinutes(),
+                spanDateTime.toMillis());
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+        }
+
+        logger.info("Done copying " + (intRecordCount) + " row(s) to " 
+            + strOutputFileName 
+            + " | Elapsed time " 
+            + formattedRunTime);
         System.exit(0);
     }
 }
