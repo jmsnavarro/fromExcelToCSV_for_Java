@@ -4,3 +4,4 @@ target/
 *.xls
 *.log
 *.jar
+*.bak
