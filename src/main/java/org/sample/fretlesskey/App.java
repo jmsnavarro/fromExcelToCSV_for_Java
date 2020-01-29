@@ -1,9 +1,9 @@
 package org.sample.fretlesskey;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.time.Duration;
@@ -20,8 +20,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.tika.Tika;
 
-/**
+/*
  * A terminal app written in Java that reads Excel rows and exports to a pipe-delimited csv file.
  *
  * Developed using Visual Studio Code and Apache Maven with the following extensions:
@@ -31,16 +32,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * - Java Test Runner
  * - Java Extension Pack
  * - Java Dependency Viewer
- *
  */
 
 //TODO: Write execution steps to a log file instead of piping at run time
-//TODO: Add Excel file version detection (2003 vs 2007) using Apache Tika
 
 public class App
 {
     //constants
     static final String APPNAME = App.class.getName();
+    static final String MIMETYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     static final String PLATTER = "PLATTER";
     static final String DRINKS = "DRINKS";
     static final String INPUT_FILENAME = "food_menu.xlsx";
@@ -105,6 +105,13 @@ public class App
         }
     }
 
+    //Detect document (stream) type
+    public static String detectDocTypeUsingFacade(InputStream stream) throws IOException {
+        Tika tika = new Tika();
+        String mediaType = tika.detect(stream);
+        return mediaType;
+    }
+
     public static void main( String[] args ) {
         //Variables
         String strCellValue = null;
@@ -122,26 +129,44 @@ public class App
             //Show execution start
             logger.info("Starting execution of " + APPNAME);
 
+            //Validate Excel (.xlsx) file
+            try {
+                logger.info("Validating '" + INPUT_FILENAME + "' source file...");
+                FileInputStream inputFileInputStream = new FileInputStream(INPUT_FILENAME);
+                String mimeType = detectDocTypeUsingFacade(inputFileInputStream);                
+                if (!mimeType.equals(MIMETYPE_XLSX)) {
+                    logger.error("'" + INPUT_FILENAME + "' is not a valid Excel (.xlsx) file.");
+                    logger.info("App will now close.");
+                    inputFileInputStream.close();
+                    System.exit(0);
+                } else {
+                    logger.info("VALIDATED: Source file");
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                System.exit(0);
+            }
+            
             //Get Excel file
-            FileInputStream file = new FileInputStream(new File(INPUT_FILENAME));
+            FileInputStream file = new FileInputStream(INPUT_FILENAME);
             
             //Create Workbook instance holding reference to .xlsx file
             XSSFWorkbook workbook = new XSSFWorkbook(file);
-            
+
             //Get first/desired sheet from the workbook
             XSSFSheet sheet = workbook.getSheetAt(0);
-            
+
             //Get sheet name
             strSheetName = sheet.getSheetName().toString();
             monthNumber = getNumMonthVal(strSheetName);
-            
+
             //Build CSV
             try {
                 //Get year else app exit
                 CellReference cellReference = new CellReference(YEAR_COLUMN);
                 Row headerRow = sheet.getRow(cellReference.getRow());
                 Cell headerCell = headerRow.getCell(cellReference.getCol());
-                
+
                 if (headerCell.getCellType() == CellType.NUMERIC) {
                     try {
                         intYear = (int)headerCell.getNumericCellValue();
@@ -152,7 +177,7 @@ public class App
                             System.exit(0);
                         }
                     } catch (Exception e) {
-                        logger.warn(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                 } else {
                     logger.warn(MESSAGE_NO_VALID_YEAR_ON_HEADER);
@@ -160,10 +185,10 @@ public class App
                     file.close();
                     System.exit(0);
                 }
-                
+
                 //Show log header
-                logger.info("Opening file '" + INPUT_FILENAME + "' for " 
-                    + CaseUtils.toCamelCase(strSheetName, true) + " " 
+                logger.info("Opening file '" + INPUT_FILENAME + "' for "
+                    + CaseUtils.toCamelCase(strSheetName, true) + " "
                     + intYear + "...");
 
                 //Generate output filename
@@ -210,9 +235,9 @@ public class App
                         detail.add(1, intYear);
                         detail.add(2, strMenuGroup);
                         csvFilePrinter.printRecord(detail);
-                        
+
                         intRecordCount++;
-                        logger.info("Collecting data from '" + strMenuGroup 
+                        logger.info("Collecting data from '" + strMenuGroup
                             + "' at row " + (row.getRowNum()));
                     }
                     detail.clear();
@@ -222,29 +247,29 @@ public class App
             } catch (IOException e) {
                 workbook.close();
                 file.close();
-                logger.warn(e.getMessage());
+                logger.error(e.getMessage());
             }
         } catch (Exception e) {
-            logger.warn(e.getMessage());
+            logger.error(e.getMessage());
             System.exit(0);
         }
 
         //Summary
         String formattedRunTime = null;
-        try {            
+        try {
             LocalDateTime endDateTime = LocalDateTime.now();
             Duration spanDateTime = Duration.between(startDateTime, endDateTime);
-            formattedRunTime = String.format("%d:%02d:%02d", 
+            formattedRunTime = String.format("%d:%02d:%02d",
                 spanDateTime.toHours(),
                 spanDateTime.toMinutes(),
                 spanDateTime.toMillis());
         } catch (Exception e) {
-            logger.warn(e.getMessage());
+            logger.error(e.getMessage());
         }
 
-        logger.info("Done copying " + (intRecordCount) + " row(s) to " 
-            + strOutputFileName 
-            + " | Elapsed time " 
+        logger.info("SUCCESS: Done copying " + (intRecordCount) + " row(s) to "
+            + strOutputFileName
+            + " | Elapsed time "
             + formattedRunTime);
         System.exit(0);
     }
