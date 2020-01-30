@@ -8,7 +8,8 @@
             "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
-            "mainClass": "${file}"
+            "mainClass": "${file}",
+            "args": "~/projects/sources/the_food_menu_2.xlsx"
         },
         {
             "type": "java",
