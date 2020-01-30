@@ -24,15 +24,15 @@ Developed using Visual Studio Code and Apache Maven with the following extension
 > Note: See **Developer Notes** below to create the jar file
 
 ```
-## simple
+## simple (log file generation included)
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
 ```
 ```
-## with output log (in Powershell terminal)
+## with additional output log (in Powershell terminal)
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
 ```
 ```
-## with output log (in Linux terminal)
+## with additional output log (in Linux terminal)
 $ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(date +%Y%m%d_%H%M%S)_fromExcelToCSV.java.log"
 ```
 
