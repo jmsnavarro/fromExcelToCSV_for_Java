@@ -34,8 +34,6 @@ import org.apache.tika.Tika;
  * - Java Dependency Viewer
  */
 
-//TODO: Write execution steps to a log file instead of piping at run time
-
 public class App
 {
     //constants
@@ -50,6 +48,7 @@ public class App
     static final String OUTPUT_FILE = "FOOD_MENU";
 
     //Logging
+    //TODO: Add parameter-based enable/disable log4j2 RollingFile appender
     private static final Logger logger = LogManager.getLogger(App.class);
 
     //Year validator
@@ -106,10 +105,10 @@ public class App
     }
 
     //Detect document (stream) type
-    public static String detectDocTypeUsingFacade(InputStream stream) throws IOException {
+    public static String getMimeType(InputStream stream) throws IOException {
         Tika tika = new Tika();
-        String mediaType = tika.detect(stream);
-        return mediaType;
+        String mimeType = tika.detect(stream);
+        return mimeType;
     }
 
     public static void main( String[] args ) {
@@ -133,7 +132,7 @@ public class App
             try {
                 logger.info("Validating '" + INPUT_FILENAME + "' source file...");
                 FileInputStream inputFileInputStream = new FileInputStream(INPUT_FILENAME);
-                String mimeType = detectDocTypeUsingFacade(inputFileInputStream);                
+                String mimeType = getMimeType(inputFileInputStream);                
                 if (!mimeType.equals(MIMETYPE_XLSX)) {
                     logger.error("'" + INPUT_FILENAME + "' is not a valid Excel (.xlsx) file.");
                     logger.info("App will now close.");
@@ -271,6 +270,8 @@ public class App
             + strOutputFileName
             + " | Elapsed time "
             + formattedRunTime);
+
+        //Close app
         System.exit(0);
     }
 }
