@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
+    <Properties>
+        <Property name="LOG_PATTERN">[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</Property>
+        <Property name="FILENAME">fromExcelToCSV.java.log</Property>
+        <Property name="RUNTIME_PATTERN">%d{yyyyMMdd_HHmmss}</Property>
+    </Properties>
     <Appenders>
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout
-                pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n" />
+        <Console name="console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}" />
         </Console>
-    </Appenders>
+        <RollingFile name="file" filename="${FILENAME}" filepattern="${RUNTIME_PATTERN}_${FILENAME}" >
+            <PatternLayout pattern="${LOG_PATTERN}" />
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+            </Policies>
+        </RollingFile>
+    </Appenders> 
     <Loggers>
-        <Root level="debug" additivity="false">
-            <AppenderRef ref="console" />
-        </Root>
+        <Logger name="org.sample.fretlesskey.App" additivity="false">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="file"/>
+        </Logger>
+        <Root level="debug" additivity="false"/>
     </Loggers>
 </Configuration>
