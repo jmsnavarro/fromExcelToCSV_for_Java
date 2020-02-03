@@ -82,7 +82,7 @@ public class App
             return "01";
         } else if (month.equals("FEB") || month.equals("FEBRUARY")) {
             return "02";
-        } else if (month .equals("MAR") || month.equals("MARCH")) {
+        } else if (month.equals("MAR") || month.equals("MARCH")) {
             return "03";
         } else if (month.equals("APR") || month.equals("APRIL")) {
             return "04";
@@ -216,6 +216,7 @@ public class App
                             logger.warn(MESSAGE_NO_VALID_YEAR_ON_HEADER);
                             workbook.close();
                             file.close();
+                            logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
                             System.exit(0);
                         }
                     } catch (Exception e) {
@@ -225,6 +226,7 @@ public class App
                     logger.warn(MESSAGE_NO_VALID_YEAR_ON_HEADER);
                     workbook.close();
                     file.close();
+                    logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
                     System.exit(0);
                 }
 
@@ -289,10 +291,12 @@ public class App
             } catch (IOException e) {
                 workbook.close();
                 file.close();
+                logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
                 logger.error(e.getMessage());
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
+            logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
             System.exit(0);
         }
 
@@ -315,6 +319,7 @@ public class App
             + formattedRunTime);
 
         //Close app
+        logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
         System.exit(0);
     }
 }
