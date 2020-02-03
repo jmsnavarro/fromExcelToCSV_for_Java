@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.lookup.*;
 import org.apache.commons.validator.GenericValidator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -49,16 +50,17 @@ public class App
     static final String OUTPUT_FILE = "FOOD_MENU";
 
     //Logging
-    //TODO: Add parameter-based enable/disable log4j2 RollingFile appender
+    //TODO: Add parameter-based enable/disable log4j2 RollingFile appender 
+    //      https://logging.apache.org/log4j/2.x/manual/lookups.html
     private static final Logger logger = LogManager.getLogger(App.class);
 
     //Year validator
-    public static boolean yearIsValid(String year) {
+    private static boolean yearIsValid(String year) {
         return GenericValidator.isDate(year, "yyyy", true);
     }
 
     //Get cell value
-    public static String getCellValue(Cell cell) {
+    private static String getCellValue(Cell cell) {
         String strCellValue = null;
         switch (cell.getCellType()) {
             case NUMERIC:
@@ -74,7 +76,7 @@ public class App
     }
 
     //Format month name to month number
-    public static String getNumMonthVal(String monthName) {
+    private static String getNumMonthVal(String monthName) {
         String month = monthName.toUpperCase();
         if (month.equals("JAN") || month.equals("JANUARY")) {
             return "01";
@@ -106,10 +108,42 @@ public class App
     }
 
     //Detect document (stream) type
-    public static String getMimeType(InputStream stream) throws IOException {
+    private static String getMimeType(InputStream stream) throws IOException {
         Tika tika = new Tika();
         String mimeType = tika.detect(stream);
         return mimeType;
+    }
+
+    //Check if file exists
+    private static boolean ifFileExists(String file) {
+        boolean exists = false;
+        if (file.trim().length() > 0) {
+            try {
+                exists = Paths.get(file).toFile().exists() ? true : false;
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
+                System.exit(0);
+            }
+        } else {
+            exists = false;
+        }
+        return exists;
+    }
+
+    //Validate Excel (.xlsx) file
+    private static boolean isExcelFile(String file) {
+        boolean isExcel = false;
+        try {
+            logger.info("Validating '" + file + "' source file...");
+            FileInputStream inputFileInputStream = new FileInputStream(file);
+            String mimeType = getMimeType(inputFileInputStream);     
+            isExcel = (mimeType.equals(MIMETYPE_XLSX)) ? true : false; 
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            System.exit(0);
+        }
+        return isExcel;
     }
 
     public static void main( String[] args ) {
@@ -126,45 +160,35 @@ public class App
         //Set run time
         LocalDateTime startDateTime = LocalDateTime.now();
 
+        //Enable/Disable logger (not yet fully implemented)
+        MainMapLookup.setMainArguments(args);
+
         try {
             //Show execution start
             logger.info("Starting execution of " + APPNAME);
 
-            //Check file if exists
-            if (args.length > 0) {
-                try {
-                    if (Paths.get(args[0]).toFile().exists()) {
-                        strFileName = args[0];
-                    } else {
-                        logger.error("ERROR: File '" + args[0] + "' do not exists. Please verify.");
-                        logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
-                        System.exit(0);
-                    }
-                } catch (Exception e) {
-                    logger.error(e.getMessage());
-                    logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
-                    System.exit(0);
-                }
+            //Check if filename provided by parameter else
+            //  will check on the same directory as the app
+            if (args[0].toString().trim().length() > 0) {
+                strFileName = args[0].toString().trim();
             }
 
-            //Validate Excel (.xlsx) file
-            try {
-                logger.info("Validating '" + strFileName + "' source file...");
-                FileInputStream inputFileInputStream = new FileInputStream(strFileName);
-                String mimeType = getMimeType(inputFileInputStream);                
-                if (!mimeType.equals(MIMETYPE_XLSX)) {
-                    logger.error("'" + strFileName + "' is not a valid Excel (.xlsx) file.");
-                    logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
-                    inputFileInputStream.close();
-                    System.exit(0);
-                } else {
-                    logger.info("VALIDATED: Source file");
-                }
-            } catch (Exception e) {
-                logger.error(e.getMessage());
+            //Check file if exists
+            if (!ifFileExists(strFileName)) {
+                logger.error("ERROR: File '" + strFileName + "' do not exists. Please verify.");
+                logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
                 System.exit(0);
             }
-            
+
+            //Validate if an Excel (.xlsx) file
+            if (isExcelFile(strFileName) == true) {
+                logger.info("VALIDATED: Source file");
+            } else {
+                logger.error("'" + strFileName + "' is not a valid Excel (.xlsx) file.");
+                logger.info(MESSAGE_APP_WILL_NOW_CLOSE);
+                System.exit(0);
+            }
+
             //Get Excel file
             FileInputStream file = new FileInputStream(strFileName);
             
@@ -180,7 +204,7 @@ public class App
 
             //Build CSV
             try {
-                //Get year else app exit
+                //Validate year else app exit
                 CellReference cellReference = new CellReference(YEAR_COLUMN);
                 Row headerRow = sheet.getRow(cellReference.getRow());
                 Cell headerCell = headerRow.getCell(cellReference.getCol());
