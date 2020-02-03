@@ -3,6 +3,7 @@
 A terminal app written in Java that reads Excel rows and export to a pipe-delimited csv file.
 
 Developed using Visual Studio Code and Apache Maven with the following extensions:
+
 - Maven for Java
 - Language Support for Java(TM) by Red Hat
 - Debugger for Java
@@ -11,6 +12,7 @@ Developed using Visual Studio Code and Apache Maven with the following extension
 - Java Dependency Viewer
 
 ## Source file requirements
+
 1. The app only accepts Excel 2007 (or later) files in *.xlsx
 2. Source must be placed on the same directory as the java (or jar) file
 3. To modify default filename, update `INPUT_FILENAME` variable
@@ -23,41 +25,47 @@ Developed using Visual Studio Code and Apache Maven with the following extension
 
 > Note: See **Developer Notes** below to create the jar file
 
-```
+```bash
 ## simple (log file generation included)
-$ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App
+$ java -jar fromExcelToCSV.jar ~/src/myfile.xlsx off
 ```
-```
+
+```bash
 ## with additional output log (in Powershell terminal)
-$ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
+$ java -jar fromExcelToCSV.jar ~/src/myfile.xlsx off > "$(Get-Date -f yyyMMdd_HHmm)_fromExcelToCSV.java.log"
 ```
-```
+
+```bash
 ## with additional output log (in Linux terminal)
-$ java -cp fromExcelToCSV.jar org.sample.fretlesskey.App > "$(date +%Y%m%d_%H%M%S)_fromExcelToCSV.java.log"
+$ java -jar fromExcelToCSV.jar ~/src/myfile.xlsx off > "$(date +%Y%m%d_%H%M%S)_fromExcelToCSV.java.log"
 ```
 
 ## Output
 
-**CSV**
+### CSV
 
 Format: YYYYMMSRC_FILENAME.csv
-```
+
+```bash
 201804FOOD_MENU.csv
 ```
-**Log**
+
+### Log
 
 Format: YYYYMMDD_HHMMHH_fromExcelToCSV.java.log
-```
+
+```bash
 20190712_1402_fromExcelToCSV.java.log
 ```
 
-## Developer Notes:
+## Developer Notes
 
-```
+```bash
 ## generate single jar file
 $ mvn clean compile assembly:single
 ```
-```
+
+```bash
 ## cleaning up
 $ mvn clean
 ```
